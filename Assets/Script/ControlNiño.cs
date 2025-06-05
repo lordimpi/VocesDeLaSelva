@@ -1,30 +1,37 @@
 using UnityEngine;
 
-public class NewMonoBehaviourScript : MonoBehaviour
-{   
+public class PlayerMovement : MonoBehaviour
+{
+    public float speed = 10f;
+    public float rotationSpeed = 100f;
+    private Rigidbody rb;
+    private Animator animator;
 
-    private float mueveX;
-    private float mueveY;
-    private float speed = 7;
-    private float speedGiro = 80;
-    private Animator controlNino;
-
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        controlNino = GetComponent<Animator>();
+        rb = GetComponent<Rigidbody>();
+        animator = GetComponent<Animator>();
+        rb.freezeRotation = true; // Evita volcaduras
     }
 
-    // Update is called once per frame 
     void Update()
     {
-        mueveX = Input.GetAxis("Horizontal");
-        mueveY = Input.GetAxis("Vertical");
-        transform.Translate(0, 0, mueveY * Time.deltaTime * speed);
-        transform.Rotate(0, mueveX * Time.deltaTime * speedGiro, 0);
+        // Animaciones
+        float moveX = Input.GetAxis("Horizontal");
+        float moveY = Input.GetAxis("Vertical");
+        animator.SetFloat("ValorX", moveX);
+        animator.SetFloat("ValorY", moveY);
+    }
 
-        controlNino.SetFloat("ValorX", mueveX);
-        controlNino.SetFloat("ValorY", mueveY);
+    void FixedUpdate()
+    {
+        // Movimiento y rotación
+        float moveX = Input.GetAxis("Horizontal");
+        float moveY = Input.GetAxis("Vertical");
 
+        Vector3 moveDirection = transform.forward * moveY * speed;
+        rb.linearVelocity = new Vector3(moveDirection.x, rb.linearVelocity.y, moveDirection.z); // Usamos linearVelocity
+
+        transform.Rotate(0, moveX * rotationSpeed * Time.fixedDeltaTime, 0);
     }
 }
