@@ -1,15 +1,23 @@
+using System.Xml.Serialization;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class UIManager : MonoBehaviour
 {
+    [Header("Player Stats Bars")]
     [SerializeField] private Image playerHealthBar;
+    [SerializeField] private Image playerHungerBar;
+    [SerializeField] private Image playerThirstBar;
+    [SerializeField] private Image playerSanityBar;
+
+    [Header("Panels")]
     [SerializeField] private GameObject deathPanel;
 
     private void Start(){
         PlayerEvents.HealthUpdate += replyPlayerHealthUpdate;
         PlayerEvents.Death += replyPlayerDeath;
         PlayerEvents.Revive += replyPlayerRevive;
+        PlayerEvents.StatsUpdate += replyPlayerStatsUpdate;
     }
 
     public void RevivePlayer(){
@@ -28,5 +36,19 @@ public class UIManager : MonoBehaviour
     private void replyPlayerRevive(){
         deathPanel.SetActive(false);
     }
+
+    private void replyPlayerStatsUpdate(float hunger, float thirst, float sanity){
+        playerHungerBar.fillAmount = hunger / 100;
+        playerThirstBar.fillAmount = thirst / 100;
+        playerSanityBar.fillAmount = sanity / 100;
+    }
+
+    private void OnDisable(){
+        PlayerEvents.HealthUpdate -= replyPlayerHealthUpdate;
+        PlayerEvents.Death -= replyPlayerDeath;
+        PlayerEvents.Revive -= replyPlayerRevive;
+        PlayerEvents.StatsUpdate -= replyPlayerStatsUpdate;
+    }
+    
     #endregion
 }

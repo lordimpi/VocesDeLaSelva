@@ -12,9 +12,13 @@ public class LifePlayer : LifeBase {
         _collider = GetComponent<Collider>();
     }
 
-    private void Start(){
+    protected void Start(){
         base.Start();
         updateHealthBar(currentLife, maxLife);
+
+        PlayerEvents.Revive += replyRevive;
+        PlayerEvents.TakeDamage += replyTakeDamage;
+        PlayerEvents.Heal += replyHeal;
     }
 
     private void Update(){
@@ -48,4 +52,32 @@ public class LifePlayer : LifeBase {
         defeated = true;
         PlayerEvents.Death?.Invoke();
     }   
+
+    #region EVENTS
+    private void replyRevive(){
+        defeated = false;
+        currentLife = maxLife;
+        updateHealthBar(currentLife, maxLife);
+    }
+
+    private void replyTakeDamage(float amount){
+        if(defeated){return;}
+        currentLife -= amount;
+        if(currentLife <= 0){
+            currentLife = 0;
+            characterDefeated();
+        }
+        updateHealthBar(currentLife, maxLife);
+    }   
+
+    private void replyHeal(float amount){
+        if(canBeHealed){
+            currentLife += amount;
+            if(currentLife > maxLife){
+                currentLife = maxLife;
+            }
+            updateHealthBar(currentLife, maxLife);
+        }
+    }
+    #endregion  
 }

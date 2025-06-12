@@ -10,7 +10,7 @@ public class PlayerMovementController : MonoBehaviour
     [SerializeField] private float jumpForce = 1.5f;
 
     [Header("Configuración de Cámara")]
-    [SerializeField] private Transform mainCamera;
+    public Transform mainCamera;
 
     [Header("Configuración de física")]
     [SerializeField] private float gravityMultiplier = 2.5f;
@@ -18,6 +18,7 @@ public class PlayerMovementController : MonoBehaviour
     private CharacterController mycCharacterController;
     private Vector3 velocity;
     private bool isGrounded;
+    private bool wasRunning = false;
 
     private void Start() {
         mycCharacterController = GetComponent<CharacterController>();
@@ -52,7 +53,19 @@ public class PlayerMovementController : MonoBehaviour
         Vector3 movement = transform.right * horizontalMovement + transform.forward * verticalMovement;
 
         // Determinar la velocidad actual (caminar o correr)
-        float currentSpeed = Input.GetKey(KeyCode.LeftShift) ? runSpeed : walkSpeed;
+        bool isRunning = Input.GetKey(KeyCode.LeftShift);
+        float currentSpeed = isRunning ? runSpeed : walkSpeed;
+
+        // Manejar eventos de correr
+        if (isRunning && !wasRunning)
+        {
+            PlayerEvents.Run?.Invoke();
+        }
+        else if (!isRunning && wasRunning)
+        {
+            PlayerEvents.StopRun?.Invoke();
+        }
+        wasRunning = isRunning;
 
         // Aplicar movimiento al Character Controller
         mycCharacterController.Move(movement * currentSpeed * Time.deltaTime);
