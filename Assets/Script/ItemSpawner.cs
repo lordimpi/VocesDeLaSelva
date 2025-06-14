@@ -3,7 +3,13 @@ using System.Collections.Generic;
 
 public class ItemSpawner : MonoBehaviour
 {
-    public GameObject itemPrefab;
+    [System.Serializable]
+    public class SpawnableItem
+    {
+    public GameObject prefab;
+    public int cantidad = 1;    
+    }
+    public List<SpawnableItem> objetosASpawnear;
     public Terrain terrain;
 
     public int numberOfItems = 15;
@@ -17,16 +23,30 @@ public class ItemSpawner : MonoBehaviour
     }
 
     void ManageItems()
-    {
-        CleanupItems();
+{
+    CleanupItems();
 
-        while (activeItems.Count < numberOfItems)
+    foreach (var objeto in objetosASpawnear)
+    {
+        int objetosExistentes = activeItems.FindAll(obj => obj != null && obj.name.Contains(objeto.prefab.name)).Count;
+
+        for (int i = objetosExistentes; i < objeto.cantidad; i++)
         {
             Vector3 position = GetRandomPointOnTerrain();
-            GameObject newItem = Instantiate(itemPrefab, position, Quaternion.identity);
+            GameObject newItem = Instantiate(objeto.prefab, position, Quaternion.identity);
+            newItem.name = objeto.prefab.name; // útil para identificar en Cleanup
+
+            PickupItem pickup = newItem.GetComponent<PickupItem>();
+            if (pickup != null)
+            {
+                pickup.spawner = this;
+            }
+
             activeItems.Add(newItem);
         }
     }
+}
+
 
     void CleanupItems()
     {
@@ -55,7 +75,12 @@ public class ItemSpawner : MonoBehaviour
     yield return new WaitForSeconds(respawnTime);
 
     Vector3 position = GetRandomPointOnTerrain();
-    GameObject newItem = Instantiate(itemPrefab, position, Quaternion.identity);
+    GameObject prefab = objetosASpawnear.Find(obj => obj.prefab.GetComponent<PickupItem>().itemData.itemName == itemData.itemName)?.prefab;
+    if (prefab == null) yield break;
+
+    GameObject newItem = Instantiate(prefab, position, Quaternion.identity);
+
+
     
     // Asignar el itemData y la referencia al spawner
     PickupItem pickup = newItem.GetComponent<PickupItem>();

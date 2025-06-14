@@ -29,6 +29,12 @@ public class PickupItem : MonoBehaviour
                     {
                         spawner.RespawnItem(itemData);
                     }
+                    
+                    InventoryUI ui = FindFirstObjectByType<InventoryUI>();
+                    if (ui != null)
+                    {
+                        ui.RefreshInventory();
+                    }
                     Destroy(gameObject);
                 }
             }

@@ -14,5 +14,5 @@ public class Item : ScriptableObject
 
     [Header("Efecto al usar")]
     public ItemEffectType effectType = ItemEffectType.None;
-    public float effectValue = 0f;
+    public float effectValue=0f;
 }
