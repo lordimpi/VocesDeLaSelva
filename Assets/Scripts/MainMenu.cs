@@ -10,6 +10,13 @@ public class MainMenu : MonoBehaviour
     public Slider volumeSlider;
     private bool isInitializing = true;
 
+    [Header("Selección de Personaje")]
+    public GameObject[] personajes;
+    public GameObject contenedorPersonaje;
+    public Button botonAnterior;
+    public Button botonSiguiente;
+    private int indicePersonajeActual = 0;
+
     void Awake()
     {
         if (backgroundMusic == null) return;
@@ -46,6 +53,61 @@ public class MainMenu : MonoBehaviour
             
             volumeSlider.onValueChanged.AddListener(SetVolume);
         }
+
+        // Configurar botones de cambio de personaje
+        if (botonAnterior != null)
+            botonAnterior.onClick.AddListener(CambiarPersonajeAnterior);
+        if (botonSiguiente != null)
+            botonSiguiente.onClick.AddListener(CambiarPersonajeSiguiente);
+
+        // Mostrar el primer personaje
+        MostrarPersonajeActual();
+    }
+
+    void MostrarPersonajeActual()
+    {
+        // Limpiar el contenedor
+        foreach (Transform child in contenedorPersonaje.transform)
+        {
+            Destroy(child.gameObject);
+        }
+
+        // Instanciar el personaje actual
+        if (personajes != null && personajes.Length > 0)
+        {
+            GameObject personaje = Instantiate(personajes[indicePersonajeActual], contenedorPersonaje.transform);
+            personaje.transform.localPosition = Vector3.zero;
+            personaje.transform.localRotation = Quaternion.identity;
+
+            // Obtener el Animator y reproducir la animación
+            Animator animator = personaje.GetComponent<Animator>();
+            if (animator != null)
+            {
+                animator.Play("Look Around");
+            }
+        }
+    }
+
+    public void CambiarPersonajeAnterior()
+    {
+        if (personajes == null || personajes.Length == 0) return;
+
+        indicePersonajeActual--;
+        if (indicePersonajeActual < 0)
+            indicePersonajeActual = personajes.Length - 1;
+
+        MostrarPersonajeActual();
+    }
+
+    public void CambiarPersonajeSiguiente()
+    {
+        if (personajes == null || personajes.Length == 0) return;
+
+        indicePersonajeActual++;
+        if (indicePersonajeActual >= personajes.Length)
+            indicePersonajeActual = 0;
+
+        MostrarPersonajeActual();
     }
 
     public void SetVolume(float volume)
@@ -84,6 +146,10 @@ public class MainMenu : MonoBehaviour
 
     public void PlayGame()
     {
+        // Guardar el índice del personaje seleccionado
+        PlayerPrefs.SetInt("PersonajeSeleccionado", indicePersonajeActual);
+        PlayerPrefs.Save();
+        
         SceneManager.LoadScene("Prueba");
     }
 }
