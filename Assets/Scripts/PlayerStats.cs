@@ -9,10 +9,10 @@ public class PlayerStats : MonoBehaviour
     [SerializeField] private float hunger = 100;
     [SerializeField] private float sanity = 100;
 
-    [Header("Tasas de Consumo Base (por 30 segundos)")]
-    [SerializeField] private float baseThirstConsumeRate = 100f;    // 100% en 30 segundos
-    [SerializeField] private float baseHungerConsumeRate = 80f;     // 80% en 30 segundos
-    [SerializeField] private float baseSanityConsumeRate = 60f;     // 60% en 30 segundos
+    [Header("Tasas de Consumo Base (por 300 segundos = 5 minutos)")]
+    [SerializeField] private float baseThirstConsumeRate = 100f;    // 100% en 5 minutos
+    [SerializeField] private float baseHungerConsumeRate = 80f;     // 80% en 5 minutos
+    [SerializeField] private float baseSanityConsumeRate = 60f;     // 60% en 5 minutos
 
     [Header("Efectos de Correr")]
     [SerializeField] private float runThirstMultiplier = 2f;      // 2x más sed al correr
@@ -75,10 +75,10 @@ public class PlayerStats : MonoBehaviour
 
     private void consumeStats()
     {
-        // Consumir estadísticas
-        thirst -= actualThirstConsumeRate / 30f;
-        hunger -= actualHungerConsumeRate / 30f;
-        sanity -= actualSanityConsumeRate / 30f;
+        // Consumir estadísticas (dividido por 300 para que dure 5 minutos)
+        thirst -= actualThirstConsumeRate / 300f;
+        hunger -= actualHungerConsumeRate / 300f;
+        sanity -= actualSanityConsumeRate / 300f;
 
         // Asegurar que los valores no sean negativos
         thirst = Mathf.Max(0, thirst);

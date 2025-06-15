@@ -10,10 +10,14 @@ public class LifePlayer : LifeBase {
 
     private void Awake(){
         _collider = GetComponent<Collider>();
+        maxLife = 100f;
+        currentLife = 100f;
     }
 
     protected void Start(){
         base.Start();
+        maxLife = 100f;
+        currentLife = 100f;
         updateHealthBar(currentLife, maxLife);
 
         PlayerEvents.Revive += replyRevive;
