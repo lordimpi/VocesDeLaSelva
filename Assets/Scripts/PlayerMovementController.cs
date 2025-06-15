@@ -19,9 +19,14 @@ public class PlayerMovementController : MonoBehaviour
     private Vector3 velocity;
     private bool isGrounded;
     private bool wasRunning = false;
+    private Animator animator;
+    private float currentSpeed;
+    private float xRotation = 0f;
 
     private void Start() {
         mycCharacterController = GetComponent<CharacterController>();
+        // Buscar el Animator en el modelo hijo
+        animator = GetComponentInChildren<Animator>();
                 
         // Ocultar el cursor al iniciar el juego
         Cursor.visible = false;
@@ -35,6 +40,7 @@ public class PlayerMovementController : MonoBehaviour
         CheckGrounded();
         ProcessMovement();
         ProcessRotation();
+        UpdateAnimations();
     }
 
     private void CheckGrounded(){
@@ -54,7 +60,7 @@ public class PlayerMovementController : MonoBehaviour
 
         // Determinar la velocidad actual (caminar o correr)
         bool isRunning = Input.GetKey(KeyCode.LeftShift);
-        float currentSpeed = isRunning ? runSpeed : walkSpeed;
+        currentSpeed = isRunning ? runSpeed : walkSpeed;
 
         // Manejar eventos de correr
         if (isRunning && !wasRunning)
@@ -67,19 +73,40 @@ public class PlayerMovementController : MonoBehaviour
         }
         wasRunning = isRunning;
 
-        // Aplicar movimiento al Character Controller
-        mycCharacterController.Move(movement * currentSpeed * Time.deltaTime);
-
-        // Salto    
+        // Salto - Movido antes del movimiento para que sea inmediato    
         if(Input.GetButtonDown("Jump") && isGrounded){
             velocity.y = Mathf.Sqrt(jumpForce * -2f * Physics.gravity.y);
+            if(animator != null) animator.SetTrigger("jump");
         }
+
+        // Aplicar movimiento al Character Controller
+        mycCharacterController.Move(movement * currentSpeed * Time.deltaTime);
 
         // Aplicar gravedad
         velocity.y += Physics.gravity.y * gravityMultiplier * Time.deltaTime;
 
         // Mover el jugador
         mycCharacterController.Move(velocity * Time.deltaTime);
+    }
+
+    private void UpdateAnimations()
+    {
+        if (animator == null) return;
+
+        // Obtener entrada horizaontal y vertical
+        float horizontalMovement = Input.GetAxis("Horizontal");
+        float verticalMovement = Input.GetAxis("Vertical");
+
+        // Calcular la velocidad actual basada en el input
+        float speed = Mathf.Abs(horizontalMovement) + Mathf.Abs(verticalMovement);
+        speed = Mathf.Clamp01(speed); // Normalizar entre 0 y 1
+
+        // Debug para verificar el valor de speed
+        Debug.Log("Speed: " + speed);
+
+        // Actualizar parámetros del animator
+        animator.SetFloat("speed", speed);
+        animator.SetBool("isRunning", wasRunning);
     }
 
     private void ProcessRotation(){
@@ -91,13 +118,13 @@ public class PlayerMovementController : MonoBehaviour
         transform.Rotate(Vector3.up * mouseX);
 
         // Rotar la cámara verticalmente
-        float xRotation = mainCamera.localEulerAngles.x - mouseY;
+        xRotation -= mouseY;
+        xRotation = Mathf.Clamp(xRotation, -65f, 65f); // Limitado a 65 grados arriba y abajo
 
-        // Limitar la rotación vertical para evitar que la camara gire completamente
-        if(xRotation > 180f) xRotation -= 360f;
-        xRotation = Mathf.Clamp(xRotation, -90f, 90f);
-
-        mainCamera.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
+        // Aplicar la rotación a la cámara
+        if(mainCamera != null) {
+            mainCamera.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
+        }
     }
 
     #region EVENTS
@@ -105,11 +132,15 @@ public class PlayerMovementController : MonoBehaviour
         this.enabled = false;
         Cursor.visible = true;
         Cursor.lockState = CursorLockMode.None;
+        if(animator != null) animator.SetTrigger("death");
     }
 
     private void replyPlayerRevive(){
         Cursor.lockState = CursorLockMode.Locked;
         this.enabled = true;
+        if(animator != null) {
+            animator.Play("Idle");
+        }
     }
     #endregion
 }
