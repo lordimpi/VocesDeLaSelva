@@ -23,17 +23,19 @@ public class PlayerMovementController : MonoBehaviour
     private float currentSpeed;
     private float xRotation = 0f;
 
-    private void Start() {
+    private void Start()
+    {
         mycCharacterController = GetComponent<CharacterController>();
         // Buscar el Animator en el modelo hijo
         animator = GetComponentInChildren<Animator>();
-                
+
         // Ocultar el cursor al iniciar el juego
         Cursor.visible = false;
         Cursor.lockState = CursorLockMode.Locked;
 
         PlayerEvents.Death += replyPlayerDeath;
         PlayerEvents.Revive += replyPlayerRevive;
+
     }
 
     private void Update(){
