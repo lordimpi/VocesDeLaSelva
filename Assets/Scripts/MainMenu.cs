@@ -150,6 +150,6 @@ public class MainMenu : MonoBehaviour
         PlayerPrefs.SetInt("PersonajeSeleccionado", indicePersonajeActual);
         PlayerPrefs.Save();
         
-        SceneManager.LoadScene("Prueba");
+        SceneManager.LoadScene("SampleScene");
     }
 }
